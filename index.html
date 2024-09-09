@@ -151,6 +151,28 @@
             border-radius: 5px;
             text-align: center;
         }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #2980b9;
+        }
+        .nav-button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -165,9 +187,10 @@
         <div id="feedback"></div>
     </div>
     <div id="result" style="display: none;">
-        <h2>תוצאות החידון</h2>
-        <p>הצלחת לענות נכון על <span id="score"></span> שאלות!</p>
-        <div id="birthday-wish"></div>
+        <h1>מזל טוב יבגני!</h1>
+        <p>הצלחתם לענות נכון על <span id="score"></span> שאלות!</p>
+        <p id="funny-message" style="font-size: 20px; margin-top: 20px;">יאללה חבר'ה עניתם יפה על השאלות הגיע הזמן להתפנק מכל הטוב שלירון הכינה!</p>
+        <p id="credit" style="position: absolute; bottom: 10px; right: 10px; font-size: 12px; color: #888;">AmitAI 0526016115</p>
     </div>
     <div id="timer" class="timer">5</div>
 
@@ -195,7 +218,7 @@
                     { text: "בעת קיפול המיטה", isCorrect: true },
                     { text: "בעת לחימה", isCorrect: false, funnyMessage: "לחימה? יבגני לוחם רק נגד השעון המעורר." }
                 ],
-                images: ["images/salat.jpeg", "images/kipul.jpg", "images/hayal.jpeg"],
+                images: ["images/SALAT.jpeg", "images/KIPUL.jpg", "images/HAYAL.jpeg"],
                 compliment: "וואו! אתם יודעים לקפל מיטות טוב יותר מיבגני!"
             },
             {
@@ -205,7 +228,7 @@
                     { text: "בוגר גמנסיה הרצליה", isCorrect: false, funnyMessage: "הרצליה? נשמע רחוק מדי..." },
                     { text: "בוגר הוגוורטס", isCorrect: false, funnyMessage: "הארי פוטר קרא לך לעזור לו?" }
                 ],
-                images: ["images/kfar.jpeg", "images/student.jpeg", "images/poter.jpg"],
+                images: ["images/KFAR.jpeg", "images/student.jpeg", "images/POTER.jpg"],
                 compliment: "מדהים! אתם מכירים את ההיסטוריה החינוכית של יבגני יותר טוב מהמורים שלו!"
             },
             {
@@ -215,7 +238,7 @@
                     { text: "נגן אקורדיון מדופלם", isCorrect: true },
                     { text: "גיטריסט בלהקת רוק", isCorrect: false, funnyMessage: "גיטריסט? יבגני נשמע יותר כמו מתופף." }
                 ],
-                images: ["images/neshifa.jpeg", "images/nagan.jpeg", "images/zamar.jpeg"],
+                images: ["images/neshifa.jpeg", "images/NAGAN.jpeg", "images/ZAMAR.jpeg"],
                 compliment: "וואו! אתם מכירים את יבגני יותר טוב מהאקורדיון שלו!"
             },
             {
@@ -225,7 +248,7 @@
                     { text: "מנופאי מנוף זרוע 50 מ'", isCorrect: false, funnyMessage: "מנופאי? לא בטוח שהוא גבוה מספיק..." },
                     { text: "מעמיס מזוודות למטוס", isCorrect: true }
                 ],
-                images: ["images/madan.jpeg", "images/manof.jpeg", "images/matos.jpeg"],
+                images: ["images/MADAN.jpeg", "images/MANOF.jpeg", "images/MATOS.jpeg"],
                 compliment: "יש לכם יותר תשובות נכונות מאשר ליבגני יש מזוודות להעמיס!"
             }
         ];
@@ -267,8 +290,26 @@
             document.getElementById('feedback').textContent = '';
             document.getElementById('feedback').className = 'feedback';
             
-            const progressPercentage = (currentQuestion / quizData.length) * 100;
-            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+            // הוספת כפתורי ניווט
+            const navigationButtons = document.createElement('div');
+            navigationButtons.className = 'navigation-buttons';
+            
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'שאלה קודמת';
+            prevButton.className = 'nav-button';
+            prevButton.onclick = () => navigateQuestion(-1);
+            prevButton.disabled = currentQuestion === 0;
+            
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'שאלה הבאה';
+            nextButton.className = 'nav-button';
+            nextButton.onclick = () => navigateQuestion(1);
+            nextButton.disabled = currentQuestion === quizData.length - 1;
+            
+            navigationButtons.appendChild(prevButton);
+            navigationButtons.appendChild(nextButton);
+            
+            imagesContainer.appendChild(navigationButtons);
         }
 
         function selectAnswer(index) {
@@ -276,7 +317,7 @@
             const feedbackElement = document.getElementById('feedback');
             
             if (selectedOption.isCorrect) {
-                document.getElementById('correctSound').play();
+                document.getElementById('applauseSound').play();
                 feedbackElement.textContent = quizData[currentQuestion].compliment;
                 feedbackElement.className = 'feedback correct';
                 score++;
@@ -298,6 +339,11 @@
                     }
                 }
             }, 3000);
+        }
+
+        function navigateQuestion(direction) {
+            currentQuestion += direction;
+            loadQuestion();
         }
 
         function startTimer() {
@@ -330,25 +376,6 @@
                 spread: 90,
                 origin: { y: 0.6 }
             });
-            
-            const birthdayWish = `
-                <h2>יבגני היקר,</h2>
-                <p>
-                    מזל טוב ליום הולדתך ה-30! כמו הגדג'טים שאתה כל כך אוהב, אתה תמיד מפתיע אותנו עם הכישרונות המיוחדים שלך.
-                    מקיפול מיטות מושלם ועד לנגינה באקורדיון, אתה תמיד מצליח להרשים!
-                </p>
-                <p>
-                    למרות שלא הצלחת להיות מנופאי או סטאז'ר במכון ויצמן, הצלחת להעמיס את חיינו בהרבה שמחה וצחוק.
-                    אנחנו מקווים שתמשיך לטפס לגבהים חדשים (אבל אולי לא על הרים, רק ליתר ביטחון).
-                </p>
-                <p>
-                    שתהיה לך שנה מלאה בהצלחות, שמחה, ואקסל-ים מושלמים!
-                    ושתמיד תזכור - גם אם אתה מתעצבן, אתה תמיד הכי מצחיק כשאתה רגוע.
-                </p>
-                <p class="signature">מהחברים והחברות באגף הכספים</p>
-            `;
-            
-            document.getElementById('birthday-wish').innerHTML = birthdayWish;
         }
     </script>
 </body>
